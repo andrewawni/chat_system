@@ -8,7 +8,7 @@ services:
       - "3307:3306"
     # local to the project directory only for demo purposes
     volumes:
-      - ./db:/var/lib/mysql:rw,delegated
+      - ./.db:/var/lib/mysql:rw,delegated
     env_file:
       - .env
 
