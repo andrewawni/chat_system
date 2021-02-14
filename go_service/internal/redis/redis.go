@@ -57,6 +57,29 @@ func (client *Client) GetInt(key string) (int, error) {
 	return intVal, err
 }
 
+// IncrementInt - increments the value of key from n to n + 1
+func (client *Client) IncrementInt(key string) (int, error) {
+	num := -1
+	txf := func(tx *redis.Tx) error {
+		// Get current value, fail if key doesn't exist (returns redis.Nil)
+		n, err := tx.Get(client.ctx, key).Int()
+		if err != nil {
+			return err
+		}
+		// Actual operation (local in optimistic lock).
+		n++
+		// Operation is committed only if the watched keys remain unchanged.
+		_, err = tx.TxPipelined(client.ctx, func(pipe redis.Pipeliner) error {
+			pipe.Set(client.ctx, key, n, 0)
+			num = n
+			return nil
+		})
+		return err
+	}
+	err := client.commitTransaction(key, txf)
+	return num, err
+}
+
 // IncrementIntAndSetNewKey - increments the value of key from n to n + 1, and sets a new redis key = `key:n+1` and value = val
 func (client *Client) IncrementIntAndSetNewKey(key string, val int) (int, error) {
 	num := -1
