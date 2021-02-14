@@ -85,13 +85,15 @@ func (app *App) createApplication(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, err.Error())
+		return
 	}
 
 	var body applicationType
 	err = json.NewDecoder(r.Body).Decode(&body)
 
 	if err != nil {
-		panic(err)
+		respondWithError(w, http.StatusBadRequest, "invalid payload")
+		return
 	}
 
 	application := applicationType{
@@ -108,16 +110,19 @@ func (app *App) createChat(w http.ResponseWriter, r *http.Request) {
 	token := vars["application_token"]
 	if token == "" {
 		respondWithError(w, http.StatusBadRequest, "no token provided")
+		return
 	}
 	n, err := app.redisClient.IncrementIntAndSetNewKey(token, 0)
 	if err != nil {
 		respondWithError(w, http.StatusBadRequest, "invalid token")
+		return
 	}
 	var body chatType
 	err = json.NewDecoder(r.Body).Decode(&body)
 
 	if err != nil {
-		panic(err)
+		respondWithError(w, http.StatusBadRequest, "invalid payload")
+		return
 	}
 
 	chat := chatType{
@@ -136,23 +141,27 @@ func (app *App) createMessage(w http.ResponseWriter, r *http.Request) {
 	token := vars["application_token"]
 	if token == "" {
 		respondWithError(w, http.StatusBadRequest, "no token provided")
+		return
 	}
 	chatNumber, err := strconv.Atoi(vars["chat_number"])
 	if err != nil {
 		respondWithError(w, http.StatusBadRequest, "invalid chat number")
+		return
 	}
 
 	key := fmt.Sprint(token, ":", chatNumber)
 	n, err := app.redisClient.IncrementInt(key)
 	if err != nil {
 		respondWithError(w, http.StatusBadRequest, "invalid token")
+		return
 	}
 
 	var body messageType
 	err = json.NewDecoder(r.Body).Decode(&body)
 
 	if err != nil {
-		panic(err)
+		respondWithError(w, http.StatusBadRequest, "invalid payload")
+		return
 	}
 
 	message := messageType{
