@@ -1,6 +1,7 @@
 package rabbit
 
 import (
+	"encoding/json"
 	"log"
 
 	"github.com/streadway/amqp"
@@ -12,15 +13,15 @@ type Client struct {
 }
 
 // CreateClient - generate a rabbitmq client
-func CreateClient(connectionURL string) (Client, error) {
+func CreateClient(connectionURL string) (*Client, error) {
 	conn, err := amqp.Dial(connectionURL)
 	client := Client{connection: conn}
 	log.Printf("[rabbit] client connected successfully")
-	return client, err
+	return &client, err
 }
 
 // Publish - publish data to queue
-func (client Client) Publish(routingKey string, data []byte) error {
+func (client *Client) Publish(routingKey string, payload interface{}) error {
 	ch, err := client.connection.Channel()
 	if err != nil {
 		return err
@@ -38,7 +39,7 @@ func (client Client) Publish(routingKey string, data []byte) error {
 	if err != nil {
 		return err
 	}
-
+	data, _ := json.Marshal(payload)
 	err = ch.Publish(
 		"",     // exchange
 		q.Name, // routing key
@@ -53,6 +54,6 @@ func (client Client) Publish(routingKey string, data []byte) error {
 }
 
 // Close - Close the client
-func (client Client) Close() {
+func (client *Client) Close() {
 	client.connection.Close()
 }
