@@ -19,7 +19,7 @@ type Client struct {
 type transactionFunction func(tx *redis.Tx) error
 
 // CreateClient - create redis client
-func CreateClient(connectionURL string) (Client, error) {
+func CreateClient(connectionURL string) (*Client, error) {
 	rdb := redis.NewClient(&redis.Options{
 		Addr:     connectionURL,
 		Password: "",
@@ -27,7 +27,7 @@ func CreateClient(connectionURL string) (Client, error) {
 	})
 
 	if rdb == nil {
-		return Client{}, errors.New("Invalid URL")
+		return &Client{}, errors.New("Invalid URL")
 	}
 
 	client := Client{
@@ -35,17 +35,17 @@ func CreateClient(connectionURL string) (Client, error) {
 		ctx: context.Background(),
 	}
 	log.Printf("[redis] client connected successfully")
-	return client, nil
+	return &client, nil
 }
 
 // SetInt - Set key to val
-func (client Client) SetInt(key string, val int) error {
+func (client *Client) SetInt(key string, val int) error {
 	err := client.rdb.Set(client.ctx, key, val, 0).Err()
 	return err
 }
 
 // GetInt - Get value of key
-func (client Client) GetInt(key string) (int, error) {
+func (client *Client) GetInt(key string) (int, error) {
 	val, err := client.rdb.Get(client.ctx, key).Result()
 	if err != nil {
 		return -1, err
@@ -58,7 +58,7 @@ func (client Client) GetInt(key string) (int, error) {
 }
 
 // IncrementIntAndSetNewKey - increments the value of key from n to n + 1, and sets a new redis key = `key:n+1` and value = val
-func (client Client) IncrementIntAndSetNewKey(key string, val int) (int, error) {
+func (client *Client) IncrementIntAndSetNewKey(key string, val int) (int, error) {
 	num := -1
 	txf := func(tx *redis.Tx) error {
 		// Get current value, fail if key doesn't exist (returns redis.Nil)
@@ -83,7 +83,7 @@ func (client Client) IncrementIntAndSetNewKey(key string, val int) (int, error) 
 	return num, err
 }
 
-func (client Client) commitTransaction(key string, txf transactionFunction) error {
+func (client *Client) commitTransaction(key string, txf transactionFunction) error {
 	const maxRetries int = 1000
 	for i := 0; i < maxRetries; i++ {
 		err := client.rdb.Watch(client.ctx, txf, key)
