@@ -23,17 +23,20 @@ type App struct {
 }
 
 type applicationType struct {
+	Type             string `json:"type"`
 	ApplicationToken string `json:"application_token"`
 	ApplicationName  string `json:"application_name"`
 }
 
 type chatType struct {
+	Type             string `json:"type"`
 	ApplicationToken string `json:"application_token"`
 	ChatNumber       int    `json:"chat_number"`
 	ChatName         string `json:"chat_name"`
 }
 
 type messageType struct {
+	Type             string `json:"type"`
 	ApplicationToken string `json:"application_token"`
 	ChatNumber       int    `json:"chat_number"`
 	MessageNumber    int    `json:"message_number"`
@@ -97,6 +100,7 @@ func (app *App) createApplication(w http.ResponseWriter, r *http.Request) {
 	}
 
 	application := applicationType{
+		Type:             "application",
 		ApplicationToken: token,
 		ApplicationName:  body.ApplicationName,
 	}
@@ -126,6 +130,7 @@ func (app *App) createChat(w http.ResponseWriter, r *http.Request) {
 	}
 
 	chat := chatType{
+		Type:             "chat",
 		ApplicationToken: token,
 		ChatNumber:       n,
 		ChatName:         body.ChatName,
@@ -165,6 +170,7 @@ func (app *App) createMessage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	message := messageType{
+		Type:             "message",
 		ApplicationToken: token,
 		ChatNumber:       chatNumber,
 		MessageNumber:    n,
