@@ -13,6 +13,8 @@ import (
 	"github.com/gorilla/mux"
 )
 
+const queueName = "chat_system"
+
 // App type
 type App struct {
 	router       *mux.Router
@@ -99,7 +101,7 @@ func (app *App) createApplication(w http.ResponseWriter, r *http.Request) {
 		ApplicationName:  body.ApplicationName,
 	}
 
-	app.rabbitClient.Publish("applications", application)
+	app.rabbitClient.Publish(queueName, application)
 	respondWithJSON(w, http.StatusCreated, application)
 }
 
@@ -126,7 +128,7 @@ func (app *App) createChat(w http.ResponseWriter, r *http.Request) {
 		ChatName:         body.ChatName,
 	}
 
-	app.rabbitClient.Publish("applications", chat)
+	app.rabbitClient.Publish(queueName, chat)
 	respondWithJSON(w, http.StatusCreated, chat)
 }
 
@@ -161,6 +163,6 @@ func (app *App) createMessage(w http.ResponseWriter, r *http.Request) {
 		MessageNumber:    n,
 		MessageContent:   body.MessageContent,
 	}
-	app.rabbitClient.Publish("applications", message)
+	app.rabbitClient.Publish(queueName, message)
 	respondWithJSON(w, http.StatusCreated, message)
 }
