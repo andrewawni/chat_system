@@ -11,7 +11,7 @@ class AppsController < ApplicationController
   end
 
   def update
-    if @app.update(app_params)
+    if @app.update(name: app_params['application_name'])
       render json: @app
     else
       render json: @app.errors, status: :unprocessable_entity
@@ -21,11 +21,11 @@ class AppsController < ApplicationController
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_app
-      @app = App.find(token: params[:token])
+      @app = App.find_by(token: params[:token])
     end
 
     # Only allow a trusted parameter "white list" through.
     def app_params
-      params.require(:app).permit(:name)
+      params.permit('application_name')
     end
 end

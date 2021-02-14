@@ -13,7 +13,7 @@ class ChatsController < ApplicationController
   end
 
   def update
-    if @chat.update(chat_params)
+    if @chat.update(name: chat_params['chat_name'])
       render json: @chat
     else
       render json: @chat.errors, status: :unprocessable_entity
@@ -32,6 +32,6 @@ class ChatsController < ApplicationController
 
     # Only allow a trusted parameter "white list" through.
     def chat_params
-      params.require(:chat).permit(:name)
+      params.permit('chat_name')
     end
 end

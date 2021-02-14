@@ -13,7 +13,7 @@ class MessagesController < ApplicationController
   end
 
   def update
-    if @message.update(message_params)
+    if @message.update(content: message_params['message_content'])
       render json: @message
     else
       render json: @message.errors, status: :unprocessable_entity
@@ -23,7 +23,7 @@ class MessagesController < ApplicationController
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_chat
-      app = App.find(token: params[:app_token])
+      app = App.find_by(token: params[:app_token])
       @chat = app.chats.find_by(number: params[:chat_number])
     end
 
@@ -33,6 +33,6 @@ class MessagesController < ApplicationController
 
     # Only allow a trusted parameter "white list" through.
     def message_params
-      params.require(:message).permit(:content)
+      params.permit(:message_content)
     end
 end
