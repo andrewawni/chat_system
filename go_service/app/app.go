@@ -73,14 +73,13 @@ func respondWithError(w http.ResponseWriter, code int, message string) {
 }
 
 func (app *App) initRoutes() {
-	// app.router.HandleFunc("/api/", indexHandler).Methods("POST")
 	app.router.HandleFunc("/api/applications", app.createApplication).Methods("POST")
 	app.router.HandleFunc("/api/applications/{application_token}/chats", app.createChat).Methods("POST")
 	app.router.HandleFunc("/api/applications/{application_token}/chats/{chat_number}/messages", app.createMessage).Methods("POST")
 }
 
 func (app *App) createApplication(w http.ResponseWriter, r *http.Request) {
-	// vars := mux.Vars(r)
+
 	token := uuid.New().String()
 	err := app.redisClient.SetInt(token, 0)
 
@@ -88,7 +87,6 @@ func (app *App) createApplication(w http.ResponseWriter, r *http.Request) {
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 	}
 
-	// body := parseBody(r)
 	var body applicationType
 	err = json.NewDecoder(r.Body).Decode(&body)
 
