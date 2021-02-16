@@ -1,0 +1,5 @@
+allow-concurrency:
+  classes: "\
+    PersistRecordsWorker,\
+    "
+  workers: 4
