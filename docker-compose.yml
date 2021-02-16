@@ -14,6 +14,7 @@ services:
 
   nginx:
     image: nginx:latest
+    restart: always
     ports:
       - "80:80"
     volumes:
@@ -25,7 +26,7 @@ services:
   rails_service:
     build:
       context: ./rails_service
-    command:  bash -c "rm -f /app/tmp/pids/server.pid && rake db:migrate && bundle exec whenever --update-crontab && bundle exec rails s -p 3000 -b '0.0.0.0' & cron -f"
+    command:  bash -c "rm -f /app/tmp/pids/server.pid && rake db:create && rake db:migrate && bundle exec whenever --update-crontab && bundle exec rails s -p 3000 -b '0.0.0.0' & cron -f"
     env_file:
       - .env
     volumes: 
@@ -55,6 +56,7 @@ services:
   go_service:
     build:
       context: ./go_service
+    restart: always
     volumes: 
       - ./go_service:/app
     depends_on: 
