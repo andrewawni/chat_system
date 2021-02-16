@@ -1,5 +1,5 @@
 class ChatsController < ApplicationController
-  before_action :set_app
+  prepend_before_action :set_app
   before_action :set_chat, only: [:show, :update]
 
   def index
