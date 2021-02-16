@@ -20,18 +20,30 @@ class ChatsController < ApplicationController
     end
   end
 
+  def search
+    chat = @app.chats.find_by(number: params[:chat_number])
+    q = if params['search_query']
+          params['search_query'] + '*'
+        else
+          '*'
+        end
+    @messages_results = chat.messages.search(q).records if chat
+    render json: @messages_results
+  end
+
   private
-    # Use callbacks to share common setup or constraints between actions.
-    def set_app
-      @app = App.find_by(token: params[:app_token])
-    end
 
-    def set_chat
-      @chat = @app.chats.find_by(number: params[:number])
-    end
+  # Use callbacks to share common setup or constraints between actions.
+  def set_app
+    @app = App.find_by(token: params[:app_token])
+  end
 
-    # Only allow a trusted parameter "white list" through.
-    def chat_params
-      params.permit('chat_name')
-    end
+  def set_chat
+    @chat = @app.chats.find_by(number: params[:number])
+  end
+
+  # Only allow a trusted parameter "white list" through.
+  def chat_params
+    params.permit('chat_name')
+  end
 end
