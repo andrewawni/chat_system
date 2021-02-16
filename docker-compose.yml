@@ -25,7 +25,7 @@ services:
   rails_service:
     build:
       context: ./rails_service
-    command:  bash -c "rm -f /app/tmp/pids/server.pid && rake db:migrate && bundle exec whenever --update-crontab && cron -f && bundle exec rails s -p 3000 -b '0.0.0.0' & rake sneakers:run"
+    command:  bash -c "rm -f /app/tmp/pids/server.pid && rake db:migrate && bundle exec whenever --update-crontab && bundle exec rails s -p 3000 -b '0.0.0.0' & cron -f"
     env_file:
       - .env
     volumes: 
@@ -34,16 +34,18 @@ services:
       - "3000:3000"
     depends_on:
       - db
+      - redis
+      - rabbitmq
+      - elasticsearch
     links:
       - db
-    env_file:
-      - .env
 
   redis:
     restart: always
     image: redis:alpine
     ports:
       - "6379:6379"
+
   rabbitmq:
     image: rabbitmq:alpine
     ports:
@@ -55,7 +57,35 @@ services:
       context: ./go_service
     volumes: 
       - ./go_service:/app
+    depends_on: 
+      - redis
+      - rabbitmq
     ports: 
       - "8000:8000"
     env_file:
       - .env
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:6.4.2
+    hostname: 'elasticsearch'
+    ports:
+      - "9200:9200"
+
+  sneakers:
+    depends_on:
+        - elasticsearch
+        - db
+        - redis
+        - rabbitmq
+    build:
+      context: ./rails_service
+    env_file:
+      - .env
+    volumes: 
+      - ./rails_service:/app
+    command: bundle exec rails runner "require 'sneakers/spawner';Sneakers::Spawner.spawn"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "1g"
+        max-file: "3"
