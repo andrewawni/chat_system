@@ -41,8 +41,7 @@ class PersistRecordsWorker
   end
 
   def work_for_messages(payload)
-    app = App.find_by(token: payload['application_token'])
-    chat = app.chats.find_by(number: payload['chat_number'])
+    chat = Chat.get_one(payload['application_token'], payload['chat_number'])
     message = Message.new(chat: chat, number: payload['message_number'], content: payload['message_content'])
     Redis.current.hincrby('rails_service:messages_counters', chat.id, 1) if message.valid?
     message.save
