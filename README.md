@@ -23,6 +23,8 @@ Run `docker-compose up -d`
 
 Ports for all services are forwarded to host for testing purposes, you can comment them and only keep the one for nginx service
 
+Run `docker-compose rails_service exec rspec` to run the tests
+
 # Endpoints
 - Create Application
 ```
