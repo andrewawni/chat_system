@@ -35,13 +35,15 @@ COPY . .
 # Build the Go app
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o main .
 
-
 ######## Start a new stage from scratch #######
 FROM alpine:latest  
 
-RUN apk --no-cache add ca-certificates
+RUN apk --no-cache add ca-certificates bash
 
 WORKDIR /root/
+
+ADD https://github.com/ufoscout/docker-compose-wait/releases/download/2.7.3/wait /wait
+RUN chmod +x /wait
 
 # Copy the Pre-built binary file from the previous stage
 COPY --from=builder /app/main .
@@ -50,4 +52,4 @@ COPY --from=builder /app/main .
 EXPOSE 8000
 
 # Command to run the executable
-CMD ["./main"] 
+CMD ["bash", "-c", "./wait && ./main"] 
