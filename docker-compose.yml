@@ -79,6 +79,8 @@ services:
         - db
         - redis
         - rabbitmq
+        - rails_service
+    restart: always
     build:
       context: ./rails_service
     env_file:
