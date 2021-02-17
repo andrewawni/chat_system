@@ -1,9 +1,8 @@
 class ChatsController < ApplicationController
-  prepend_before_action :set_app
   before_action :set_chat, only: [:show, :update]
 
   def index
-    @chats = @app.chats.all
+    @chats = Chat.get_all(params[:app_token])
 
     render json: @chats
   end
@@ -34,12 +33,8 @@ class ChatsController < ApplicationController
   private
 
   # Use callbacks to share common setup or constraints between actions.
-  def set_app
-    @app = App.find_by(token: params[:app_token])
-  end
-
   def set_chat
-    @chat = @app.chats.find_by(number: params[:number])
+    @chat = Chat.get_one(params[:app_token], params[:number])
   end
 
   # Only allow a trusted parameter "white list" through.

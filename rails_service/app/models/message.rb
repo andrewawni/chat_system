@@ -22,5 +22,13 @@ class Message < ApplicationRecord
     super(options.merge({ only: [:number, :content] }))
   end
 
+  def self.get_one(app_token, chat_number, message_number)
+    joins(chat: [:app]).where(apps: { token: app_token }, chats: { number: chat_number }, messages: { number: message_number }).limit(1).first
+  end
+
+  def self.get_all(app_token, chat_number)
+    joins(chat: [:app]).where(apps: { token: app_token }, chats: { number: chat_number })
+  end
+
   __elasticsearch__.create_index! unless __elasticsearch__.index_exists?
 end
